@@ -184,6 +184,10 @@ DGL_INLINE_ONLY static void dglSetDrawPage(dglContext *context, int page) {
 	context->draw_yoffset = page * context->draw_fb->yres;
 }
 
+DGL_INLINE_ONLY static int dglGetNumberOfPages(dglScreenFB *fb) {
+	return fb->virtual_yres / fb->yres;
+}
+
 // Clipping functions.
 
 DGL_INLINE_ONLY static void dglSetClipRectangleFromFramebufferDimensions(dglFB *fb,

@@ -1,5 +1,5 @@
 CFLAGS = -Ofast -Wall -Wmissing-declarations
-#CFLAGS = -ggdb -Wall
+#CFLAGS = -ggdb -Wall -Wmissing-declarations
 LIBRARY_OBJECT = libdgl.a
 LIBRARY_MODULE_OBJECTS = dgl-main.o dgl-consolefb.o
 

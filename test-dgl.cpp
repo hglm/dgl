@@ -424,6 +424,10 @@ int main(int argc, char *argv[]) {
 		demo_dma = false;
 		printf("Animated demo (demo_dma): accelerated DMA CopyArea not available.\n");
 	}
+	if (demo_dma && dglGetNumberOfPages(cfb) < 2) {
+		demo_dma = false;
+		printf("Animated demo (demo_dma): Need more than one framebuffer page.\n");
+	}
 	if (demo_pageflip && (cfb->flags & DGL_FB_FLAG_HAVE_PAN_DISPLAY) == 0) {
 		demo_pageflip = false;
 		printf("Animated demo (demo_pageflip): PanDisplay not available.\n");
@@ -488,8 +492,12 @@ int main(int argc, char *argv[]) {
 		fps_memcpy = AnimatedDemo(context, DEMO_MODE_MEMCPY, max_pages, vsync,
 			demo_half_size);
 
-	dglSetDrawPage(context, 0);
-	dglFill(context, 0, 0, cfb->xres, cfb->yres, 0x000000);
+	if (fill_nodma || copyarea_memcpy || copyarea_dma || putimage_memcpy
+	|| test_pageflip || demo_pageflip || demo_dma || demo_memcpy) {
+		// Clear the screen if any tests were performed.
+		dglSetDrawPage(context, 0);
+		dglFill(context, 0, 0, cfb->xres, cfb->yres, 0x000000);
+	}
 
 	const char *info_str = dglGetInfoString(cfb);
 	dglDestroyConsoleFramebuffer(cfb);
