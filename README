@@ -1,0 +1,128 @@
+#dgl
+DGL is a small low-level graphics library that was put together to test
+extensions to the Linux kernel fb interface on ARM-based Raspberry Pi and
+Raspberry Pi 2. It also usable on other devices.
+
+The library provides a few simple drawing primitives (Fill, CopyArea,
+PutImage, PutPixel) with flexible support for different drawing surfaces
+(console framebuffer, offscreen pixmap, image).
+
+On the Raspberry Pi and Raspberry Pi 2, the current kernel fb interface as
+of February 2015 is limited to single-buffering (no page flipping), limiting
+opportunies for fluid tear-free animation, although library will work.
+
+However, a relatively trivial patch for the Linux kernel for Raspberry Pi
+devices extends the framebuffer to three buffers and allows double-buffering
+or triple-buffering. The DMA-accelerated CopyArea function that was already
+provided by the fb interface has also been extended to allow access to all
+three pages. In this way, relatively fluid graphics and animation are more
+easily achievable on the Raspberry Pi models, without resorting to EGL and
+OpenGL ES 2.0.
+
+The patch is available in my "patches" repository
+(raspberrypi/rpi-extend-fb.patch) and also in the extend-fb branch of my fork
+of raspberrypi/linux.
+
+--- Kernel graphics mode and superuser priviledges ---
+
+Currently, the kernel has to switch to graphics mode using the KDSETMODE system
+call in order to for the system call that allows page flipping/display panning
+to be functional. Setting kernel graphics mode requires superuser priviledges,
+requiring running as root or use of sudo when testing programs that use page
+flipping.
+
+An important drawback of kernel graphics mode is that normally, in event of a
+program interruption or crash the display will be left in a state where the
+text console is not visible. However, the library attempts to catch such
+situations and restore text mode automatically. A utility is provided
+("textmode") that can be installed on the system and run with superuser
+priviledges when the console is stuck in graphics mode.
+
+--- Compiling and installing ---
+
+Run 'make' to compile. Run 'sudo make install' to install the library and
+textmode restoration utility. When the header files of the pixman library
+is detected, pixman will automatically be used by DGL, otherwise it
+provides its own software blit functions.
+
+--- Example programs ---
+
+The test-dgl program is used to demonstrate and test the functions of the
+library. It also has benchmarking options. Run without arguments for a list
+of options.
+
+For an overview of library functions, check out the main header file dgl.h.
+
+A small example program follows. This is identical to the code in the file
+simple-example.cpp.
+
+// Simple example program for the DGL graphics library.
+// Compile with g++ simple-example.cpp -o simple-example -ldgl -lpixman.
+
+// Include standard library.
+#include <stdlib.h>
+// Include unistd.h for sleep function.
+#include <unistd.h>
+// Include DGL library header file
+#include "dgl.h"
+
+// C/C++ main entry function.
+int main(int arg, char *argv[]) {
+	// Create and initialize the console framebuffer. A pointer to the
+	// dglFB structure is returned. This can be used to create a drawing
+	// context, or directly with certain functions. The dlgFB structure
+	// contains information about the address and dimensions of the
+	// framebuffer.
+	dglConsoleFB *fb = dglCreateConsoleFramebuffer();
+
+	// Create a graphics context. The context consists of a read
+	// framebuffer and a draw framebuffer. The draw framebuffer is most
+	// relevant since it will be the target of most drawing functions.
+	// The read framebuffer will only be used by dglCopyArea.
+	//
+	// In this example, both the read and draw framebuffers are set to
+	// the console framebuffer (the screen), so that drawing operations
+	// will be immediately visible.
+	dglContext *context = dglCreateContext(fb, fb);
+
+	// Clear the entire screen with black pixels. dglFill uses the current
+	// draw framebuffer from the context as target. fb->xres is the width
+	// of the screen and fb->yres the height. A pixel value of 0
+	// represents red, green and blue color components of zero, independent
+	// of framebuffer depth setting.
+	dglFill(context, 0, 0, fb->xres, fb->yres, 0x000000);
+
+	// Calculate the pixel value of three color components that range
+	// from 0.0 to 1.0 (floating point). In this example, the selected
+	// color will be greenish (green component is the maximum value)
+	// with blue added (0.6f), creating a color close to cyan.
+	// The first parameter is the pixel format of the console framebuffer
+	// (which can be 16 bpp or 32bpp). uint32_t is a standard 32-bit
+	// unsigned integer type.
+	uint32_t pixel = dglConvertColor(fb->format, 0.0f, 1.0f, 0.6f);
+
+	// Draw a rectangle filled with the color. The current draw
+	// framebuffer (the screen) will be used. The x and y coordinates
+	// are 100, and the width and height of the rectangle are 200 and
+	// 600 pixels, respectively. This draws a elongated rectangle on
+	// the left side of the screen, which will fit even on low-resolution
+	// screens.
+	dglFill(context, 100, 100, 200, 600, pixel);
+
+	// Now we copy the region that precisely surrounds the filled
+	// rectangle to the right part of the screen using the dglCopyArea
+	// function, creation an identical elongated rectangle.
+	// The top-left source coordinates are (100, 100) and the destination
+	// x coordinate is 100 pixels offset to the right from the middle
+	// of the screen witha destination y coordinate of 100. Finally,
+	// the width and height of 200 by 600 precisely match the filled
+	// rectangle.
+	dglCopyArea(context, 100, 100, fb->xres / 2 + 100, 100, 200, 600);
+
+	// Wait five seconds in order to show the result before restoring
+	// textmode.
+	sleep(5);
+
+	// Restore text mode and free the fb structure.
+	dglDestroyConsoleFramebuffer(fb);
+}
