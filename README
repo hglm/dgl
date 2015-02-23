@@ -8,7 +8,7 @@ PutImage, PutPixel) with flexible support for different drawing surfaces
 
 On the Raspberry Pi and Raspberry Pi 2, the current kernel fb interface as
 of February 2015 is limited to single-buffering (no page flipping), limiting
-opportunies for fluid tear-free animation, although library will work.
+opportunies for fluid tear-free animation, although the library will work.
 
 However, a relatively trivial patch for the Linux kernel for Raspberry Pi
 devices extends the framebuffer to three buffers and allows double-buffering
@@ -40,7 +40,7 @@ priviledges when the console is stuck in graphics mode.
 --- Compiling and installing ---
 
 Run 'make' to compile. Run 'sudo make install' to install the library and
-textmode restoration utility. When the header files of the pixman library
+textmode restoration utility. When the header file of the pixman library
 is detected, pixman will automatically be used by DGL, otherwise it
 provides its own software blit functions.
 

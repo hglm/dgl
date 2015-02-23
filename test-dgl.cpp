@@ -368,7 +368,7 @@ int main(int argc, char *argv[]) {
 			"test-pageflip     Page-flipping test (should show red, green, and possibly blue).\n"
 			"demo-dma          Perform animated demo using DMA from offscreen buffer.\n"
 			"demo-pageflip     Perform amimated demo using page-flipping.\n"
-			"demo-mempcy       Perform animated demo using memcpy from offscreen buffer.\n\n"
+			"demo-memcpy       Perform animated demo using memcpy from offscreen buffer.\n\n"
 			"Options:\n\n"
 			"double-buffer     Use double-buffering instead of triple-buffering when using \n"
 			"                  page flipping.\n"
