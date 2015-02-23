@@ -1,4 +1,3 @@
-#dgl
 DGL is a small low-level graphics library that was put together to test
 extensions to the Linux kernel fb interface on ARM-based Raspberry Pi and
 Raspberry Pi 2. It also usable on other devices.
@@ -20,7 +19,7 @@ easily achievable on the Raspberry Pi models, without resorting to EGL and
 OpenGL ES 2.0.
 
 The patch is available in my "patches" repository
-(raspberrypi/rpi-extend-fb.patch) and also in the extend-fb branch of my fork
+(raspberrypi/extend-fb/*) and also in the extend-fb branch of my fork
 of raspberrypi/linux.
 
 --- Kernel graphics mode and superuser priviledges ---

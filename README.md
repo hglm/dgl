@@ -19,5 +19,5 @@ easily achievable on the Raspberry Pi models, without resorting to EGL and
 OpenGL ES 2.0.
 
 The patch is available in my "patches" repository
-(raspberrypi/rpi-extend-fb.patch) and also in the extend-fb branch of my fork
+(raspberrypi/extend-fb/* and also in the extend-fb branch of my fork
 of raspberrypi/linux.
