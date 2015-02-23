@@ -24,12 +24,19 @@ CFLAGS_LIB = $(CFLAGS) $(DEFINES_LIB) $(PKG_CONFIG_CFLAGS_LIB)
 CFLAGS_DEMO = $(CFLAGS) $(PKG_CONFIG_CFLAGS_DEMO)
 LFLAGS_DEMO = $(PKG_CONFIG_LIBS_DEMO) -lpthread
 DEMO_PROGRAM = test-dgl
+PROGRAMS = simple-example textmode
+HAVE_DATASETTURBO = $(shell if [ -e /usr/include/DataSetTurbo/dstConfig.h ]; then echo YES; fi)
+ifeq ($(HAVE_DATASETTURBO), YES)
+PROGRAMS += $(DEMO_PROGRAM)
+else
+$(warning DataSetTurbo library not installed, cannot compile demo program test-dgl)
+endif
 
 TARGET_MACHINE := $(shell gcc -dumpmachine)
 LIB_DIR = /usr/lib/$(TARGET_MACHINE)
 HEADER_FILES = dgl.h
 
-all : $(LIBRARY_OJECT) $(DEMO_PROGRAM) simple-example textmode
+all : $(LIBRARY_OJECT) $(PROGRAMS)
 
 $(DEMO_PROGRAM) : $(LIBRARY_OBJECT) test-dgl.o
 	g++ -o $(DEMO_PROGRAM) test-dgl.o $(LIBRARY_OBJECT) $(LFLAGS_DEMO)

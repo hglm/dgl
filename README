@@ -39,16 +39,39 @@ priviledges when the console is stuck in graphics mode.
 
 --- Compiling and installing ---
 
-Run 'make' to compile. Run 'sudo make install' to install the library and
-textmode restoration utility. When the header file of the pixman library
-is detected, pixman will automatically be used by DGL, otherwise it
-provides its own software blit functions.
+The demo program 'test-dgl' requires the DataSetTurbo library to be installed.
+Get it and install it using
+
+	git clone https://github.com/hglm/DataSetTurbo.git
+	cd DataSetTurbo
+	git checkout testing
+	make
+	sudo make install
+
+The testing branch may be required (as used above). If the DataSetTurbo
+library is not installed, the main demo program test-dgl will not be
+compiled.
+
+Run 'make' to compile the DGL library. Run 'sudo make install' to install
+the library and textmode restoration utility. When the header file of the
+pixman library is detected, pixman will automatically be used by DGL,
+otherwise it provides its own software blit functions.
 
 --- Example programs ---
 
 The test-dgl program is used to demonstrate and test the functions of the
 library. It also has benchmarking options. Run without arguments for a list
 of options.
+
+With the extend-fb kernel patch enabled, running
+
+	sudo test-dgl demo-pageflip vsync
+
+should result in very smooth animation using page-flipping on both the
+Raspberry Pi 1 and 2. Without the vsync option (which cause the framerate
+to converge to 60 fps), an overclocked Raspberry Pi reaches almost 80 fps
+(not much margin in terms of CPU power margin to maintain 60 fps) while the
+Raspberry 2 closes in on 300 fps.
 
 For an overview of library functions, check out the main header file dgl.h.
 
