@@ -1,21 +1,28 @@
-CFLAGS = -std=gnu++0x -Ofast -Wall -Wmissing-declarations
+CFLAGS = -Ofast -Wall -Wmissing-declarations
 #CFLAGS = -ggdb -Wall
 LIBRARY_OBJECT = libdgl.a
 LIBRARY_MODULE_OBJECTS = dgl-main.o dgl-consolefb.o
 
-PKG_CONFIG_CFLAGS_DEMO = datasetturbo
-PKG_CONFIG_LIBS_DEMO = datasetturbo
+PKG_CONFIG_CFLAGS_DEMO_NAMES = datasetturbo
+PKG_CONFIG_LIBS_DEMO_NAMES = datasetturbo
 HAVE_PIXMAN = $(shell if [ -e /usr/include/pixman-1/pixman.h ]; then echo YES; fi)
 ifeq ($(HAVE_PIXMAN), YES)
 DEFINES_LIB += -DDGL_USE_PIXMAN
-PKG_CONFIG_CFLAGS_LIB += pixman-1
-PKG_CONFIG_LIBS_DEMO += pixman-1
+PKG_CONFIG_CFLAGS_LIB_NAMES += pixman-1
+PKG_CONFIG_LIBS_DEMO_NAMES += pixman-1
+PKG_CONFIG_LIBS_SIMPLE_EXAMPLE += `pkg-config --libs pixman-1`
 endif
 
-CFLAGS_LIB = $(CFLAGS) $(DEFINES_LIB) `pkg-config --cflags $(PKG_CONFIG_CFLAGS_LIB)`
+ifneq ($(PKG_CONFIG_CFLAGS_LIB_NAMES),)
+PKG_CONFIG_CFLAGS_LIB = `pkg-config --cflags $(PKG_CONFIG_CFLAGS_LIB_NAMES)`
+endif
+PKG_CONFIG_CFLAGS_DEMO = `pkg-config --cflags $(PKG_CONFIG_CFLAGS_DEMO_NAMES)`
+PKG_CONFIG_LIBS_DEMO = `pkg-config --libs $(PKG_CONFIG_LIBS_DEMO_NAMES)`
 
-CFLAGS_DEMO = $(CFLAGS) `pkg-config --cflags $(PKG_CONFIG_CFLAGS_DEMO)`
-LFLAGS_DEMO = `pkg-config --libs $(PKG_CONFIG_LIBS_DEMO)` -lpthread
+CFLAGS_LIB = $(CFLAGS) $(DEFINES_LIB) $(PKG_CONFIG_CFLAGS_LIB)
+
+CFLAGS_DEMO = $(CFLAGS) $(PKG_CONFIG_CFLAGS_DEMO)
+LFLAGS_DEMO = $(PKG_CONFIG_LIBS_DEMO) -lpthread
 DEMO_PROGRAM = test-dgl
 
 TARGET_MACHINE := $(shell gcc -dumpmachine)
@@ -29,7 +36,7 @@ $(DEMO_PROGRAM) : $(LIBRARY_OBJECT) test-dgl.o
 
 simple-example : $(LIBRARY_OBJECT) simple-example.o
 	g++ -o simple-example simple-example.o $(LIBRARY_OBJECT) \
-		`pkg-config --libs pixman-1`
+		$(PKG_CONFIG_LIBS_SIMPLE_EXAMPLE)
 
 $(LIBRARY_OBJECT) : $(LIBRARY_MODULE_OBJECTS)
 	ar r $(LIBRARY_OBJECT) $(LIBRARY_MODULE_OBJECTS)
@@ -44,12 +51,15 @@ install : libdgl.a textmode
 test-dgl.o : test-dgl.cpp
 	g++ -c $(CFLAGS_DEMO) $< -o $@
 
+simple-example.o : simple-example.cpp
+	g++ -c $(CFLAGS) $< -o $@
+
 .cpp.o :
 	g++ -c $(CFLAGS_LIB) $< -o $@
 
 clean :
 	rm -f $(LIBRARY_MODULE_OBJECTS) $(LIBRARY_OBJECT)
-	rm -f test-dgl.o $(DEMO_PROGRAM)
+	rm -f test-dgl.o $(DEMO_PROGRAM) simple-example textmode
 
 textmode : textmode.cpp
 	g++ -O textmode.cpp -o textmode
