@@ -378,7 +378,7 @@ void dglConsoleFBPanDisplay(dglScreenFB *fb, int x, int y) {
 		y = cfb->virtual_yres - cfb->yres;
 	fb_var.xoffset = x;
 	fb_var.yoffset = y;
-	ioctl(cfb->fd, FBIOPUT_VSCREENINFO, &fb_var);
+	ioctl(cfb->fd, FBIOPAN_DISPLAY, &fb_var);
 }
 
 void dglConsoleFBWaitVSync(dglScreenFB *fb) {
